@@ -171,13 +171,13 @@ class Handler(WPHandler):
         for l in iter:
             n = len(l)
             if n + total > maxlen:
-                yield ''.join(buf)
+                yield b''.join(buf)
                 buf = []
                 total = 0
-            buf.append(l)
+            buf.append(l.encode('utf-8'))
             total += n
         if buf:
-            yield ''.join(buf)
+            yield b''.join(buf)
 
     def data_output_generator(self, data, data_columns, format="csv"):
         formatted = self.csv_iterator_from_iter(data, data_columns) if format == "csv" \
