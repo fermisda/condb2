@@ -1,5 +1,5 @@
 from condb.ui.cli import CLI, CLICommand, InvalidOptions, InvalidArguments
-from condb import ConDB, ConDBClient
+from condb import ConDB, ConDBClient, CDFolder
 from condb.timelib import text2timestamp
 import sys, csv, io, time, os
 
@@ -77,9 +77,9 @@ class CreateCommand(CLICommand):
         read_roles = opts.get("-R", "").split(",")
         write_roles = opts.get("-W", "").split(",")
         grants={"r":[r for r in read_roles if r], "w":[r for r in write_roles if r]}
-        if "s" in opts:
+        if "-s" in opts:
             sql = CDFolder.createSQL(folder, coltypes, owner, grants, drop_existing)
-            print(s)
+            print(sql)
         else:
             conn = connect_to_db(opts, dbname)
             con_db = ConDB(conn)
@@ -330,11 +330,3 @@ def main():
 
 if __name__ == "__main__":
     main()    
-    
-    
-    
-    
-    
-    
-    
-    
