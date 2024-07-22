@@ -102,7 +102,7 @@ class ConDB:
         # print("copy_from: table=%s" % (table,))
         # print("copy_from: data=%s" % (data.getvalue(),))
         try:
-            # c.copy_from(data, table, columns=columns)     # Depricated, not maintained
+            # c.copy_from(data, table, columns=columns)     # Deprecated, not maintained
             c.copy_expert(f"COPY {table}({', '.join(columns)}) FROM STDIN", data)
         except:
             c.execute("rollback")
