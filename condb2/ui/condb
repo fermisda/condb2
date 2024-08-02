@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python -m condb2.ui.condb_ui "$@"
