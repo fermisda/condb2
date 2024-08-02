@@ -1,4 +1,4 @@
-ConDB REST API
+ConDB2 REST API
 ==============
 
 
@@ -41,7 +41,7 @@ The rest must be a list of one or more data columns.
 Example:
 
     .. code-block::
-    
+
         channel,tv,x1,x2,y
         1,137,25.4,37.3,-3
         2,137,26.4,137.3,-2
@@ -52,9 +52,9 @@ The ``put`` method requires authentication. Currently, the only authentication i
 This authentication mechanism is supported by `curl <https://curl.se/curl>`_ and by `requests <https://docs.python-requests.org/en/latest/index.html>`_ Python library. To use is with ``curl``:
 
     .. code-block:: shell
-    
+
         $ curl -X POST -T data.csv --digest -u username:password http://.../put?folder=...
-        
+
 To use with ``requests`` library:
 
     .. code-block:: python
