@@ -1,5 +1,5 @@
 import sys, random, time
-from condb import ConDB
+from condb2 import ConDB
 
 #
 # Sample code demonstrating direct access to a ConDB folder
@@ -14,7 +14,7 @@ python direct.py host=<dbhost> port=<dbport> dbname=... user=... password=...
 #
 
 db = ConDB(connstr = " ".join(sys.argv[1:]))
-folder = db.createFolder("test_data", 
+folder = db.createFolder("test_data",
     [   # data columns and their types
         ("x", "double precision"),
         ("y", "double precision"),
@@ -44,7 +44,7 @@ for i in range(50):
             n = (i*(i+1)) % 7
             chunk.append((channel, tv, x, y, n))
     folder.addData(chunk)
-    
+
     if i == 25:
         folder.tag("chunk_25")
 
