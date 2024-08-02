@@ -1,8 +1,14 @@
 import getopt
+# import hashlib
+# import random
 import sys
-import urllib.request, urllib.error, urllib.parse, hashlib, random, time
-from timelib import text2datetime, epoch
-from datetime import datetime
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+# from datetime import datetime
+
+from condb2.timelib import epoch, text2datetime
 
 Usage = """
 python get_csv.py [options] <URL> <table> <column>,...
@@ -27,16 +33,20 @@ do_retrieve = True
 channel_range = None
 
 for opt, val in opts:
-    if opt == '-d':       data_type = val
-    if opt == '-t': 
+    if opt == '-d':
+        data_type = val
+    if opt == '-t':
         ttxt = val
         t = epoch(text2datetime(val))
-    if opt == '-r': 
+    if opt == '-r':
         trtxt = val
         tr = epoch(text2datetime(val))
-    if opt == '-T': tag = val
-    if opt == '-n': do_retrieve = False
-    if opt == '-c': channel_range = val
+    if opt == '-T':
+        tag = val
+    if opt == '-n':
+        do_retrieve = False
+    if opt == '-c':
+        channel_range = val
 
 if tag and tr:
     print("Can not specify both tag and record time")
@@ -46,10 +56,14 @@ table = args[1]
 url = args[0]
 columns = args[2]
 args = "table=%s&columns=%s&t=%f" % (table,columns,t)
-if tag: args += "&tag=%s" % (tag,)
-if data_type:  args += "&type=%s" % (data_type,)
-if channel_range:   args += "&cr=%s" % (channel_range,)
-if not tag and tr:  args += "&rtime=%f" % (tr,)
+if tag:
+    args += "&tag=%s" % (tag,)
+if data_type:
+    args += "&type=%s" % (data_type,)
+if channel_range:
+    args += "&cr=%s" % (channel_range,)
+if not tag and tr:
+    args += "&rtime=%f" % (tr,)
 url = "%s/get?%s" % (url, args)
 
 if do_retrieve:

@@ -1,5 +1,7 @@
-from ConDB import ConDB
-import sys, getopt
+import getopt
+import sys
+
+from condb2.ConDB import ConDB
 
 Usage = """
 python tag.py [options] <database name> <table_name> <tag>
@@ -27,14 +29,21 @@ if len(args) < 3 or args[0] == 'help':
     sys.exit(0)
 
 for opt, val in opts:
-    if opt == '-h':         dbcon.append("host=%s" % (val,))
-    elif opt == '-p':       dbcon.append("port=%s" % (int(val),))
-    elif opt == '-U':       dbcon.append("user=%s" % (val,))
-    elif opt == '-w':       dbcon.append("password=%s" % (val,))
-    if opt == '-o':         override = True
-    if opt == '-c':         comment = val
-    if opt == '-t':         existing_tag = val
-    
+    if opt == '-h':
+        dbcon.append("host=%s" % (val,))
+    elif opt == '-p':
+        dbcon.append("port=%s" % (int(val),))
+    elif opt == '-U':
+        dbcon.append("user=%s" % (val,))
+    elif opt == '-w':
+        dbcon.append("password=%s" % (val,))
+    if opt == '-o':
+        override = True
+    if opt == '-c':
+        comment = val
+    if opt == '-t':
+        existing_tag = val
+
 
 dbcon.append("dbname=%s" % (args[0],))
 

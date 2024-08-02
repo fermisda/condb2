@@ -1,17 +1,19 @@
-from ConDB import ConDB
+import getopt
+import sys
 from datetime import datetime
-from timelib import text2datetime
-import sys, getopt
+
+from condb2.ConDB import ConDB
+from condb2.timelib import text2datetime
 
 Usage = """
-python read_data.py [options] <database name> <table_name> <t1> <t2> <columns,...>
+python cmp.py [options] <database name> <table_name> <t1> <t2> <columns,...>
 options:
     -h <host>
     -p <port>
     -U <user>
     -w <password>
 
-    -T <tag>    
+    -T <tag>
     -d <data_type>       default = common
 """
 
@@ -27,14 +29,21 @@ if len(args) < 3 or args[0] == 'help':
     sys.exit(0)
 
 for opt, val in opts:
-    if opt == '-h':         dbcon.append("host=%s" % (val,))
-    elif opt == '-p':       dbcon.append("port=%s" % (int(val),))
-    elif opt == '-U':       dbcon.append("user=%s" % (val,))
-    elif opt == '-w':       dbcon.append("password=%s" % (val,))
-    elif opt == '-t':       t = text2datetime(val)
-    elif opt == '-T':       tag = val
-    elif opt == '-d':       data_type = val
-    
+    if opt == '-h':
+        dbcon.append("host=%s" % (val,))
+    elif opt == '-p':
+        dbcon.append("port=%s" % (int(val),))
+    elif opt == '-U':
+        dbcon.append("user=%s" % (val,))
+    elif opt == '-w':
+        dbcon.append("password=%s" % (val,))
+    elif opt == '-t':
+        t = text2datetime(val)
+    elif opt == '-T':
+        tag = val
+    elif opt == '-d':
+        data_type = val
+
 
 dbcon.append("dbname=%s" % (args[0],))
 t1 = text2datetime(args[2])
@@ -54,5 +63,5 @@ channels.sort()
 for c in channels:
     if data1[c] != data2[c]:
         print((c, iov1[c], data1[c], iov2[c], data2[c]))
-        
-            
+
+

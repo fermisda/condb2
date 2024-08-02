@@ -1,5 +1,7 @@
-import getopt, sys, os
-from timelib import text2datetime, epoch
+import getopt
+import sys
+
+from condb2.timelib import epoch, text2datetime
 
 Usage = """
 gen_csv.py [options] [<file>]
@@ -17,18 +19,23 @@ value = 1
 
 opts, args = getopt.getopt(sys.argv[1:], "n:c:t:v:")
 for opt, val in opts:
-    if opt == '-t': t = val
-    if opt == '-n': rows = int(val)
-    if opt == '-c': columns = val.split(",")
-    if opt == '-v': value = int(val)
-    
-    
-if args:    outfile = args[0]
+    if opt == '-t':
+        t = val
+    if opt == '-n':
+        rows = int(val)
+    if opt == '-c':
+        columns = val.split(",")
+    if opt == '-v':
+        value = int(val)
+
+
+if args:
+    outfile = args[0]
 if outfile:
     outfile = open(outfile, 'w')
 else:
     outfile = sys.stdout
-    
+
 t = epoch(text2datetime(t))
 
 outfile.write("channel,tv,%s\n" % (','.join(columns),))
@@ -39,5 +46,5 @@ for row in range(rows):
     channel = row
     data = tuple([value]*len(columns))
     outfile.write(row_format % ((channel, t) + data))
-    
-        
+
+
