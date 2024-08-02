@@ -1,5 +1,6 @@
 import hashlib
-from py3 import to_str, to_bytes
+
+from py3 import to_bytes
 
 def signature(password, salt, args, data):
         m = hashlib.md5()

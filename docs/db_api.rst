@@ -1,12 +1,12 @@
-ConDB Direct Access Python API
+ConDB2 Direct Access Python API
 ==============================
 
-This document describes the low lovel API, which allows direct access to the ConDB database.
+This document describes the low lovel API, which allows direct access to the ConDB2 database.
 
-.. autoclass:: condb.ConDB
+.. autoclass:: condb2.ConDB
    :special-members:
    :members:
 
-.. autoclass:: condb.CDFolder
+.. autoclass:: condb2.CDFolder
    :members:
 

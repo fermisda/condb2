@@ -6,29 +6,30 @@ class UTC(tzinfo):
 
     def utcoffset(self, dt):
         return self.ZERO
-        
+
     def tzname(self):
         return "UTC"
-        
+
     def dst(self, dt):
         return self.ZERO
 
 class ShiftTZ(tzinfo):
-    
+
     def __init__(self, shift):
         self.Shift = shift
-        
+
     def utcoffset(self, dt):
         return timedelta(hours=self.Shift)
-        
+
     def tzname(self):
         return '%+02d:00' % (self.Shift,)
-        
+
     def dst(self, dt):
         return self.ZERO
 
 def epoch(t):
-    if isinstance(t, (int, float)):    return t
+    if isinstance(t, (int, float)):
+        return t
     else:
         assert isinstance(t, datetime)
         return t.timestamp()
@@ -40,31 +41,31 @@ def text2datetime(t):
         try:
             t = datetime.strptime(t, '%Y-%m-%dT%H:%M:%S.%f')
             t = t.replace(tzinfo=UTC())
-        except:
-            try:    
+        except Exception:
+            try:
                 t = datetime.strptime(t, '%Y-%m-%dT%H:%M:%S')
                 t = t.replace(tzinfo=UTC())
-            except:
+            except Exception:
                 #print sys.exc_type, sys.exc_value
-                try:    
+                try:
                     t = datetime.strptime(t, '%m/%d/%Y %H:%M:%S')
                     t = t.replace(tzinfo=UTC())
-                except:
+                except Exception:
                     try:
                         d,t = tuple(t.split(None, 1))
                         tz = None
-                        if '-' in t:  
+                        if '-' in t:
                             t,tz = tuple(t.split('-'))
                             tz = ShiftTZ(-int(tz))
-                        elif '+' in t: 
+                        elif '+' in t:
                             t,tz = tuple(t.split('+'))
                             tz = ShiftTZ(int(tz))
                         #print 'tz=', tz
-                        t = datetime.strptime('%sT%s' % (d,t), 
+                        t = datetime.strptime('%sT%s' % (d,t),
                                     '%Y-%m-%dT%H:%M:%S')
                         if tz:
                             t = t.replace(tzinfo=tz)
-                    except:
+                    except Exception:
                         pass
     if isinstance(t, str):
         unit = 's'

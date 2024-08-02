@@ -4,11 +4,11 @@ class UnknownCommand(Exception):
     def __init__(self, command, argv):
         self.Command = command
         self.Argv = argv
-        
+
     def __str__(self):
         return f"Uknown command: {self.Command}\n" + \
             f"    command line: {self.Argv}"
-            
+
 class CLIException(Exception):
     def __init__(self, message=None):
         self.Message = message
@@ -18,20 +18,20 @@ class CLIException(Exception):
 
 class EmptyCommandLine(CLIException):
     pass
-    
+
 class InvalidArguments(CLIException):
     pass
-    
+
 class InvalidOptions(CLIException):
     pass
-    
+
 def format_paragraph(indent, text):
     if "\n" in text:
         first_line, rest = text.split("\n", 1)
         return [first_line.strip()] + [indent + l for l in textwrap.dedent(rest.rstrip()).split("\n")]
     else:
         return [text.strip()]
-    
+
 class CLIInterpreter(object):
 
     Opts = ("", [])
@@ -87,12 +87,12 @@ class CLIInterpreter(object):
         if len(args) < self.MinArgs:
             raise InvalidArguments()
         return self.make_opts_dict(opts), args
-    
+
     # overridable
     def _run(self, command, context, argv, usage_on_empty = True, usage_on_unknown = True):
         return None
-        
-    
+
+
 class CLICommand(CLIInterpreter):
 
     GNUStyle = True
@@ -102,7 +102,7 @@ class CLICommand(CLIInterpreter):
         if argv and argv[0] == "-?":
             print(self.usage(command), file=sys.stderr)
             return
-            
+
         if argv and argv[0] in ("help", "--help"):
             print(self.help(command), file=sys.stderr)
             return
@@ -126,8 +126,9 @@ class CLICommand(CLIInterpreter):
             usage = self.Usage
         except AttributeError:
             usage = ""
-            
-        if command: command = command + " "
+
+        if command:
+            command = command + " "
         return indent + command + "\n".join(format_paragraph(indent + "  ", usage))
 
     def usage(self, word=""):
@@ -137,12 +138,12 @@ class CLICommand(CLIInterpreter):
         return usage
 
 class CLI(CLIInterpreter):
-    
+
     GNUStyle = False
 
     def __init__(self, *args):
         self.UsageParagraph = self.Usage
-        self.Words = []          
+        self.Words = []
         self.Interpreters = {}
 
         i = 0
@@ -151,19 +152,19 @@ class CLI(CLIInterpreter):
             self.Words.append(w)
             self.Interpreters[w] = c
             i += 2
-        
+
     def commands(self):
         return self.Words
-            
+
     # overridable
     def update_context(self, context, command, opts, args):
         return context
-    
+
     def _run(self, pre_command, context, argv, usage_on_error = True):
         if argv and argv[0] == "-?":
             print(self.usage(pre_command), file=sys.stderr)
             return
-            
+
         if argv and argv[0] in ("help", "--help"):
             print(self.help(pre_command), file=sys.stderr)
             return
@@ -185,13 +186,13 @@ class CLI(CLIInterpreter):
                 return
             else:
                 raise EmptyCommandLine()
-            
+
         word, rest = args[0], args[1:]
-        
+
         if word in ("help", "--help"):
             print(self.help(word), file=sys.stderr)
             return
-        
+
         context = self.update_context(context, word, opts, args)
 
         interp = self.Interpreters.get(word)
@@ -205,19 +206,20 @@ class CLI(CLIInterpreter):
                 return
             else:
                 raise UnknownCommand(word, args)
-        
-        if pre_command: pre_command = pre_command + " "
+
+        if pre_command:
+            pre_command = pre_command + " "
         #print(interp, ".run(): pre:", pre_command, "   word:", word)
         return interp._run(pre_command + word, context, rest, usage_on_error = usage_on_error)
-        
+
     def run(self, argv, context=None, usage_on_error = True, argv0=None):
         argv0 = argv0 or argv[0]
         command, argv = argv0, argv[1:]
         self._run(command, context, argv, usage_on_error)
-        
+
     def format_usage_paragraph(self, indent=""):
         return "\n".join(format_paragraph(indent, self.UsageParagraph))
-        
+
     def usage_headline(self):
         return self.UsageParagraph.split("\n", 1)[0].strip()
 
@@ -248,13 +250,14 @@ class CLI(CLIInterpreter):
             return out
         else:
             return "\n".join(out) + end
-            
+
     def help(self, pre_command="", indent=""):
 
         out = []
-        if pre_command: pre_command = pre_command + " "
+        if pre_command:
+            pre_command = pre_command + " "
         formatted_usage = self.format_usage_paragraph(indent + "  ")
-        if formatted_usage: 
+        if formatted_usage:
             formatted_usage = formatted_usage + "\n"
         else:
             formatted_usage = "<command> [<command options, agruments> ...]\n"
@@ -285,9 +288,10 @@ class CLI(CLIInterpreter):
         out.append(indent + (fmt % ("help", "")))
         #print(self, f": usage:{out}")
         return "\n".join(out)
-        
+
     def print_usage(self, headline="Usage:", head_paragraph = "", file=None):
-        if file is None: file = sys.stderr
+        if file is None:
+            file = sys.stderr
         head_paragraph = textwrap.dedent(head_paragraph).strip()
         if headline:
             print(headline, file=file)
@@ -295,4 +299,4 @@ class CLI(CLIInterpreter):
             print(head_paragraph, file=file)
         usage = self.usage(headline=None)
         print(self.usage(headline=None), file=file)
-        
+

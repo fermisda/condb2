@@ -11,16 +11,17 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-import sys, os
+import sys
+import os
 # sys.path.insert(0, os.path.abspath('.'))
 
 sys.path.insert(0, os.path.abspath('..'))
 #print(sys.path)
-import condb
+import condb2
 
 # -- Project information -----------------------------------------------------
 
-project = 'ConDB'
+project = 'ConDB2'
 copyright = '2023, Igor Mandrichenko'
 author = 'Igor Mandrichenko'
 

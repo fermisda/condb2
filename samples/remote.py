@@ -1,5 +1,5 @@
 import sys, random, time
-from condb import ConDBClient
+from condb2 import ConDBClient
 
 #
 # Sample code demonstrating remote access to a ConDB folder via the ConDB web server
@@ -33,7 +33,7 @@ for i in range(10):
             chunk.append((channel, tv, x, y, n))
     if chunk:
         client.put_data(folder, chunk, columns)
-    
+
     if i == 5:
         client.tag_state(folder, "chunk_25", override=True)
 

@@ -5,7 +5,7 @@ class ConDBError(Exception):
     def __init__(self, url, response):
         self.URL = url
         self.Response = response
-    
+
     def __str__(self):
         name = self.__class__.__name__
         out = f"{name}\nURL: {self.URL}\nStatus code:{self.Response.status_code}\n{self.Response.text}"
@@ -31,7 +31,7 @@ def to_bytes(x):
     if not isinstance(x, bytes):
         x = x.encode("utf-8")
     return x
-    
+
 def to_str(x):
     if isinstance(x, bytes):
         x = x.decode("utf-8")
@@ -74,7 +74,7 @@ class HTTPClient(object):
             if sleep_time > 0:
                 time.sleep(sleep_time)
         return response
-        
+
     def raise_on_error(self, url, response):
         if response.status_code == 403:
             raise PermissionError(url, response)
@@ -120,7 +120,8 @@ class HTTPClient(object):
     RS = b'\x1E'
     def unpack_json_seq(self, response):
         for line in response.iter_lines():
-            if line:    line = line.strip()
+            if line:
+                line = line.strip()
             while line and line.startswith(self.RS):
                 line = line[1:]
             if line:
@@ -162,12 +163,13 @@ class HTTPClient(object):
                 raise NotFoundError(url, response.status_code, response.text)
             elif response.status_code != 200:
                 raise WebAPIError(url, response.status_code, response.text)
-            
+
             if response.headers.get("Content-Type") != "application/json-seq":
                 raise WebAPIError(url, 200, "Expected content type application/json-seq. Got %s instead." % (response.headers.get("Content-Type"),))
 
             for line in response.iter_lines():
-                if line:    line = line.strip()
+                if line:
+                    line = line.strip()
                 while line.startswith(b'\x1E'):
                     line = line[1:]
                 if line:
@@ -177,14 +179,15 @@ class HTTPClient(object):
 
     def interpret_json_stream(self, response):
         for line in response.iter_lines():
-            if line:    line = line.strip()
+            if line:
+                line = line.strip()
             while line.startswith(b'\x1E'):
                 line = line[1:]
             if line:
                 #print(f"stream line:[{line}]")
                 obj = json.loads(line)
                 yield obj
-                    
+
     def interpret_response(self, response, none_if_not_found=True):
         if response.status_code // 100 != 2:
             if none_if_not_found and response.status_code == 404:
@@ -202,7 +205,8 @@ class HTTPClient(object):
             return response.text
 
     def get(self, uri_suffix, none_if_not_found=False):
-        if not uri_suffix.startswith("/"):  uri_suffix = "/"+uri_suffix
+        if not uri_suffix.startswith("/"):
+            uri_suffix = "/"+uri_suffix
         url = "%s%s" % (self.ServerURL, uri_suffix)
         #print("url:", url)
         try:
@@ -214,17 +218,18 @@ class HTTPClient(object):
 
     def post(self, uri_suffix, data, **args):
         #print("post_json: data:", type(data), data)
-        
-        if not uri_suffix.startswith("/"):  uri_suffix = "/"+uri_suffix
-        
+
+        if not uri_suffix.startswith("/"):
+            uri_suffix = "/"+uri_suffix
+
         if data is None or isinstance(data, (dict, list)):
             data = json.dumps(data)
         else:
             data = to_bytes(data)
         #print("post_json: data:", type(data), data)
-            
+
         url = "%s%s" % (self.ServerURL, uri_suffix)
-        
+
         try:
             headers = self.auth_headers()           # in case we have TokenAuthClientMixin or similar
         except AttributeError:

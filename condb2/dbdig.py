@@ -9,7 +9,7 @@ class DbDig:
             self.Impl = DbDigPostgres(conn)
 
     def __getattr__(self, name):
-        return getattr(self.Impl, name)    
+        return getattr(self.Impl, name)
 
 class DbDigImpl:
 
@@ -18,7 +18,7 @@ class DbDigImpl:
         if len(words) >= 2:
             nspace, table = tuple(words[:2])
         return nspace, table
-       
+
 class DbDigOracle(DbDigImpl):
     def __init__(self, conn):
         self.Conn = conn
@@ -26,12 +26,12 @@ class DbDigOracle(DbDigImpl):
     def columns(self, nspace, table):
         c = self.Conn.cursor()
         nspace, table = self.getTableNameSpace(nspace, table)
-        c.execute("""select column_name, data_type 
+        c.execute("""select column_name, data_type
             from all_tab_columns
-            where upper(owner)=upper('%s') and upper(table_name)=upper('%s')""" % 
+            where upper(owner)=upper('%s') and upper(table_name)=upper('%s')""" %
             (nspace, table))
         return c.fetchall()
-    
+
 class DbDigPostgres(DbDigImpl):
 
     def __init__(self, conn):
@@ -76,13 +76,13 @@ class DbDigPostgres(DbDigImpl):
         Find all tables
         """
         c = self.Conn.cursor()
-        sql = """select c.relname 
+        sql = """select c.relname
                     from pg_class c, pg_namespace n
                     where c.relnamespace = n.OID
                         and n.nspname = %s
                         and c.relkind='r'
         """
-        #            (select OID from pg_namespace where nspname=%s) and relkind='r'""" 
+        #            (select OID from pg_namespace where nspname=%s) and relkind='r'"""
 
         c.execute(sql, (nspace,))
         dd = c.fetchall()
@@ -125,7 +125,7 @@ class DbDigPostgres(DbDigImpl):
         """
         nspace, table = self.getTableNameSpace(nspace, table)
         c = self.Conn.cursor()
-        sql = "SELECT indexname,indexdef FROM pg_indexes WHERE schemaname=%s AND tablename = %s" 
+        sql = "SELECT indexname,indexdef FROM pg_indexes WHERE schemaname=%s AND tablename = %s"
 
         c.execute(sql, (nspace, table))
         dd = c.fetchall()
@@ -186,7 +186,7 @@ class DbDigPostgres(DbDigImpl):
         nspace, table = self.getTableNameSpace(nspace, table)
         c = self.Conn.cursor()
         sql = """SELECT constraint_name FROM information_schema.table_constraints WHERE
-                 table_schema=%s AND constraint_type='FOREIGN KEY' AND constraint_name IN 
+                 table_schema=%s AND constraint_type='FOREIGN KEY' AND constraint_name IN
                 (SELECT constraint_name  FROM information_schema.constraint_table_usage WHERE table_schema=%s AND table_name=%s) ORDER BY table_name
               """
 
@@ -205,7 +205,7 @@ class DbDigPostgres(DbDigImpl):
 
 
     def keyDef(self, nspace, kname):
-        """ 
+        """
         Find key details
         """
         # Referring table
@@ -236,9 +236,9 @@ class DbDigPostgres(DbDigImpl):
                                                    ELSE r.oid = c.conrelid AND (a.attnum = ANY (c.conkey))
                                                END AND NOT a.attisdropped AND (c.contype = ANY
                                 (ARRAY['p'::"char", 'u'::"char", 'f'::"char"])) AND r.relkind =
-                                'r'::"char") 
+                                'r'::"char")
                         as x(namespace, table_name, column_name, constraint_name)
-                where namespace=%s and constraint_name=%s""" 
+                where namespace=%s and constraint_name=%s"""
 
         c.execute(sql, (nspace, kname))
         pp = c.fetchall()
@@ -290,11 +290,11 @@ def pp(cursor, data=None, rowlens=0):
 if __name__ == '__main__':
     import psycopg2
     import getopt, sys
-    
+
     opts, args = getopt.getopt(sys.argv[1:], 'p:h:U:W:')
 
     port     = 5432
-    dbname   = 'postgres'  
+    dbname   = 'postgres'
     user     = 'postgres'
     host     = 'localhost'
     password = ''
@@ -309,13 +309,13 @@ if __name__ == '__main__':
         if opt=='-W':
             password = val
     if args:
-        dbname = args[0]  
+        dbname = args[0]
     dsn = "dbname='%s' user='%s' host='%s' port=%s password='%s'" % (dbname, user, host, port, password)
 ###    print "DSN: %s" % "dbname='%s' user='%s' host='%s' port=%s password='************'" % (dbname, user, host, port, )
-      
+
     try:
         conn = psycopg2.connect(dsn)
-    except:
+    except Exception:
         print("I am unable to connect to the database")
         sys.exit(1)
 

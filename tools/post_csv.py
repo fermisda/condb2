@@ -1,7 +1,12 @@
 import getopt
 import sys
-import urllib.request, urllib.error, urllib.parse, hashlib, random, time
-from py3 import to_str, to_bytes
+# import urllib.request
+# import urllib.error
+# import urllib.parse
+# import hashlib
+import random
+import time
+# from py3 import to_str, to_bytes
 from signature import signature
 import requests
 
@@ -12,7 +17,8 @@ python post_csv.py [-d <data type>] <file> <table> <password> <URL>
 data_type = None
 opts, args = getopt.getopt(sys.argv[1:], 'd:')
 for opt, val in opts:
-    if opt == '-d':       data_type = val
+    if opt == '-d':
+        data_type = val
 
 if not args:
     print(Usage)
@@ -31,13 +37,14 @@ random.seed(time.time())
 salt = '%s' % (random.random(),)
 data = open(fn, 'rb').read()
 sig = signature(pwd, salt, url_args, data)
-headers = {   
+headers = {
         'X-Salt':       salt,
         'X-Signature':  sig
         #'Expect':       "100-continue"
     }
 
-try:    response = requests.post(url, data=data, headers=headers)
+try:
+    response = requests.post(url, data=data, headers=headers)
 except Exception as e:
     print(e)
 else:

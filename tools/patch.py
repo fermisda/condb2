@@ -1,6 +1,8 @@
-from ConDB import ConDB
-import sys, getopt, psycopg2
-from timelib import text2datetime
+import sys
+import getopt
+
+from condb2.ConDB import ConDB
+from condb2.timelib import text2datetime
 
 Usage = """
 python patch.py [options] -t <t end> <database name> <table_name> <column>,...
@@ -17,10 +19,11 @@ options:
 def parseData(input):
     tolerances = None
     data = []
-    for l in input.readlines():
-        l = l.strip()
-        if not l:   continue
-        words = l.split(',')
+    for ln in input.readlines():
+        ln = ln.strip()
+        if not ln:
+            continue
+        words = ln.split(',')
         if words[0] == 'tolerance':
             tolerances = [float(x) for x in words[2:]]
         elif words[0] == 'channel':
@@ -30,10 +33,12 @@ def parseData(input):
             tv = text2datetime(float(words[1]))
             tup = []
             for x in words[2:]:
-                try:    x = int(x)
-                except:
-                    try:    x = float(x)
-                    except:
+                try:
+                    x = int(x)
+                except ValueError:
+                    try:
+                        x = float(x)
+                    except ValueError:
                         pass
                 tup.append(x)
             tup = tuple(tup)
@@ -58,14 +63,21 @@ if len(args) < 3 or args[0] == 'help':
     sys.exit(0)
 
 for opt, val in opts:
-    if opt == '-h':         dbcon.append("host=%s" % (val,))
-    elif opt == '-p':       dbcon.append("port=%s" % (int(val),))
-    elif opt == '-U':       dbcon.append("user=%s" % (val,))
-    elif opt == '-w':       dbcon.append("password=%s" % (val,))
-    elif opt == '-c':       input = open(val,'r')
-    elif opt == '-t':       tend = text2datetime(val)
-    elif opt == '-d':       data_type = val
-    
+    if opt == '-h':
+        dbcon.append("host=%s" % (val,))
+    elif opt == '-p':
+        dbcon.append("port=%s" % (int(val),))
+    elif opt == '-U':
+        dbcon.append("user=%s" % (val,))
+    elif opt == '-w':
+        dbcon.append("password=%s" % (val,))
+    elif opt == '-c':
+        input = open(val,'r')
+    elif opt == '-t':
+        tend = text2datetime(val)
+    elif opt == '-d':
+        data_type = val
+
 
 dbcon.append("dbname=%s" % (args[0],))
 

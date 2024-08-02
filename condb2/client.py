@@ -5,7 +5,7 @@ from urllib.parse import quote
 
 from requests.auth import HTTPDigestAuth
 
-from condb.timelib import epoch
+from condb2.timelib import epoch
 
 # from .http_client import HTTPClient, ConDBError, ServerSideError, PermissionError, BadRequestError, NotFoundError, WebAPIError
 from .http_client import HTTPClient

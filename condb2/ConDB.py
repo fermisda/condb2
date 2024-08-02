@@ -1,16 +1,16 @@
-import sys, time, datetime
+import time
 import io
 from .dbdig import DbDig
+#from dbdig import DbDig
 
 API_Version = "1.0.3"
-
-#from dbdig import DbDig
 
 def cursor_iterator(c):
     tup = c.fetchone()
     while tup:
         yield tup
         tup = c.fetchone()
+
 
 class ConDB:
 
@@ -34,15 +34,18 @@ class ConDB:
         # print(f"self.Conn = {self.Conn}")
         self.ConnStr = connstr
 
+
     def connect(self):
         if self.Conn is None:
             import psycopg2
             self.Conn = psycopg2.connect(self.ConnStr)
         return self.Conn
 
+
     def cursor(self):
         conn = self.connect()
         return conn.cursor()
+
 
     def openFolder(self, name):
         """Opens existing ConDB folder.
@@ -57,12 +60,13 @@ class ConDB:
         CDFolder or None
             If the folder does not exist, returns None. Otherwise - CDFolder object representing the folder
         """
-
         return CDFolder.open(self, name)
+
 
     def namespaces(self):
         dig = DbDig(self.Conn)
         return dig.nspaces()
+
 
     def createFolder(self, name, column_types, owner=None, grants = {}, drop_existing=False):
         """Creates or opens ConDB folder
@@ -86,6 +90,7 @@ class ConDB:
         t = CDFolder.create(self, name, column_types, owner, grants, drop_existing)
         return t
 
+
     def execute(self, table, sql, args=()):
         #print("DB.execute(%s, %s, %s)" % (table, sql, args))
         table_no_ns = table.split('.')[-1]
@@ -94,6 +99,7 @@ class ConDB:
         c = self.cursor()
         c.execute(sql, args)
         return c
+
 
     def copy_from(self, title, data, table_template, columns):
         table = table_template.replace('%t', title)
@@ -104,17 +110,19 @@ class ConDB:
         try:
             # c.copy_from(data, table, columns=columns)     # Deprecated, not maintained
             c.copy_expert(f"COPY {table}({', '.join(columns)}) FROM STDIN", data)
-        except:
+        except Exception:
             c.execute("rollback")
             raise
         else:
             c.execute("commit")
         return c
 
+
     def disconnect(self):
         if self.Conn:
             self.Conn.close()
         self.Conn = None
+
 
     def tables(self, namespace = "public"):
         dig = DbDig(self.Conn)
@@ -129,8 +137,10 @@ class ConDB:
                 if (tn+"_update") in db_tables_set and (tn+"_tag") in db_tables_set:
                         t = "%s.%s" % (namespace, tn)
                         t = self.tableFromDB(t)
-                        if t:   condb_tables.append(t)
+                        if t:
+                            condb_tables.append(t)
         return condb_tables
+
 
 class CDFolder:
 
@@ -166,6 +176,7 @@ class CDFolder:
 
     StructureColumns = ["__channel", "__tv", "__tr", "__data_type"]
 
+
     def __init__(self, db, name, data_columns_types=None):
         self.Name = name
         self.DataColumnsTypes = data_columns_types
@@ -181,6 +192,7 @@ class CDFolder:
         else:
             self.FolderName = words[0]
             self.Namespace = ""
+
 
     def readDataColumnsFromDB(self):
         dig = DbDig(self.DB.connect())
@@ -200,6 +212,7 @@ class CDFolder:
         if not self.validate():
             raise ValueError("Not a conditions DB table (verification failed)")
 
+
     @staticmethod
     def open(db, full_name):
         dbcon = db.connect()
@@ -213,12 +226,13 @@ class CDFolder:
             name = words[1]
         try:
             columns = dig.columns(ns, name + "_update")
-        except:
+        except Exception:
             return None
         if not columns:
             return None     # <name>_update table does not exist
         columns_types = [(tup[0], tup[1]) for tup in columns if tup[0] not in CDFolder.StructureColumns]
         return CDFolder(db, full_name, data_columns_types=columns_types)
+
 
     def data_column_types(self):
         """
@@ -228,6 +242,7 @@ class CDFolder:
             list of (name, type) tuples for the data columns
         """
         return self.DataColumnsTypes[:]
+
 
     def __columns(self, columns, prefix = None, as_text = False, exclude=[]):
         if exclude:
@@ -239,29 +254,36 @@ class CDFolder:
         else:
             return columns
 
+
     def data_columns(self, prefix = None, as_text = False):
         return self.__columns(self.DataColumns, prefix=prefix, as_text=as_text)
 
+
     def all_columns(self, prefix = None, as_text = False):
         return self.__columns(self.AllColumns, prefix=prefix, as_text=as_text)
+
 
     def execute(self, sql, args=()):
         #print "Folder.execute(%s, %s)" % (sql, args)
         return self.DB.execute(self.Name, sql, args)
 
+
     def copy_from(self, data, table, columns):
         return self.DB.copy_from(self.Name, data, table, columns)
+
 
     def exists(self):
         from psycopg2.errors import UndefinedTable
 
-        try:    self.execute("select * from %t_update limit 1")
+        try:
+            self.execute("select * from %t_update limit 1")
         except UndefinedTable:
             return False
         else:
             return True
         finally:
             self.execute("rollback")
+
 
     @staticmethod
     def create(db, name, column_types, owner, grants = {}, drop_existing=False):
@@ -278,12 +300,15 @@ class CDFolder:
         f.createTables(owner, grants, drop_existing)
         return f
 
+
     def tableNames(self):
         return [self.Name + "_" + s for s in ("tag", "update")]
+
 
     def dataTableNames(self):
         #return [self.Name + "_" + s for s in ("snapshot_data", "update")]
         return [self.Name + "_" + s for s in ("update",)]
+
 
     def validate(self):
         # check if all necessary tables exist and have all the columns
@@ -291,17 +316,19 @@ class CDFolder:
         for t in self.tableNames():
             try:
                 c.execute("select * from %s limit 1" % (t,))
-            except:
+            except Exception:
                 c.execute("rollback")
                 return False
         if self.Columns:
             columns = ','.join(self.Columns)
             for t in self.dataTableNames():
-                try:    c.execute("select %s from %s limit 1" % (columns, t))
-                except:
+                try:
+                    c.execute("select %s from %s limit 1" % (columns, t))
+                except Exception:
                     c.execute("rollback")
                     return False
         return True
+
 
     @staticmethod
     def createSQL(name, column_types, owner = None, grants = {}, drop_existing=False):
@@ -341,22 +368,24 @@ class CDFolder:
         #print("createSQL: sql:\n", sql)
         return sql
 
-    def createTables(self, owner = None, grants = {}, drop_existing=False):
+
+    def createTables(self, owner=None, grants={}, drop_existing=False):
         from psycopg2.errors import UndefinedTable
 
         exists = self.exists()
         c = self.DB.cursor()
 
         if exists and drop_existing:
-            try:    self.execute(self.DropTables)
+            try:
+                self.execute(self.DropTables)
             except UndefinedTable:
                 c.execute("rollback")
             exists = False
         if not exists:
             c = self.DB.cursor()
-            sql = CDFolder.createSQL(self.Name, self.DataColumnsTypes, drop_existing=drop_existing, owner=owner,
-                        grants=grants)
+            sql = CDFolder.createSQL(self.Name, self.DataColumnsTypes, drop_existing=drop_existing, owner=owner, grants=grants)
             c.execute(sql)
+
 
     def tags(self):
         """Returns list of tags defined for the folder
@@ -369,6 +398,7 @@ class CDFolder:
         c = self.execute("""select __name, __tr from %t_tag order by __name""", ())
         return cursor_iterator(c)
 
+
     def dataTypes(self):
         """Returns list of data types defined for the folder
 
@@ -380,10 +410,12 @@ class CDFolder:
         c = self.execute("""select distinct __data_type from %t_update order by __data_type""", ())
         return [x[0] for x in c.fetchall()]
 
+
     def split_update_tuple(self, tup):
         n_struct = len(self.StructureColumns)
         struct, data = tup[:n_struct], tup[n_struct:]
         return struct, data             # (__channel, __tv, __tr, __data_type), (data....)
+
 
     def shadow_data(self, data_iterator):
         # filter out hidden rows
@@ -399,6 +431,7 @@ class CDFolder:
             elif tr >= min_tr:
                 min_tr = tr
                 yield tup
+
 
     def _get_data_point(self, tv, tag=None, tr=None, data_type=None, channel_range=None):
         # returns iterator [(channel, tv, data_type, data, ...)] unsorted
@@ -440,8 +473,10 @@ class CDFolder:
 
         yield from cursor_iterator(c)
 
+
     def merge_timelines(self, initial, timelines):
         return sorted(list(initial) + list(timelines), key = lambda row: tuple(row[:3]))       # sort by channel, tv, data_type
+
 
     def getData(self, t0, t1=None, tag=None, tr=None, data_type=None, channel_range=None):
         """Retieves data for specified validity time or time interval from the folder
@@ -479,11 +514,11 @@ class CDFolder:
         all_columns = self.all_columns(prefix="u", as_text=True)
 
         params = {
-            "tv0":   t0,
-            "tv1":   t1,
-            "tag":  tag,
-            "tr":   tr,
-            "data_type": data_type,
+            "tv0"        : t0,
+            "tv1"        : t1,
+            "tag"        : tag,
+            "tr"         : tr,
+            "data_type"  : data_type,
             "min_channel": channel_range[0] if channel_range else None,
             "max_channel": channel_range[1] if channel_range else None
         }
@@ -513,6 +548,7 @@ class CDFolder:
             """, params)
         timelines = cursor_iterator(c)
         return self.shadow_data(self.merge_timelines(initial, timelines))
+
 
     def searchData(self, tag=None, tr=None, data_type=None, channel_range=None,
             conditions=[]):
@@ -558,8 +594,8 @@ class CDFolder:
         all_columns = self.all_columns(prefix="u", as_text=True)
 
         params = {
-            "tr":   tr,
-            "data_type": data_type,
+            "tr"         : tr,
+            "data_type"  : data_type,
             "min_channel": channel_range[0] if channel_range else None,
             "max_channel": channel_range[1] if channel_range else None
         }
@@ -599,6 +635,7 @@ class CDFolder:
             {conditions_sql}
         """, params)
         return self.shadow_data(cursor_iterator(c))
+
 
     def addData(self, data, data_type="", tr=None, columns=None):
         """Adds data to the folder
@@ -643,6 +680,7 @@ class CDFolder:
         self.copy_from(csv, "%t_update", columns)
         return tr
 
+
     def tag(self, tag, comment="", override=False, tr=None):
         """Creates new tag with the specified Tr
 
@@ -673,6 +711,7 @@ class CDFolder:
             """, (tr, tag, comment))
         c.execute("commit")
 
+
     def copyTag(self, tag, new_tag, comment="", override=False):
         """Creates new tag with the same Tr as an existing tag
 
@@ -690,7 +729,8 @@ class CDFolder:
         c = self.execute("select __tr from %t_tag where __name=%s", (tag,))
         tup = c.fetchone()
         tr = None
-        if tup: tr = tup[0]
+        if tup:
+            tr = tup[0]
         if tr is not None:
             self.tag(new_tag, comment=comment, override=override, tr=tr)
         return tr
