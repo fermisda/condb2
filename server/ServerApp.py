@@ -15,9 +15,9 @@ from rfc2617 import digest_server
 from webpie import Response, WPApp, WPHandler, sanitize
 from wsdbtools import ConnectionPool
 
-from condb import ConDB, signature
-from condb import __version__ as condb_version
-from condb.timelib import epoch, text2timestamp
+from condb2 import ConDB, signature
+from condb2 import __version__ as condb_version
+from condb2.timelib import epoch, text2timestamp
 
 REST_Version = "2.0.1"
 API_Version = condb_version
