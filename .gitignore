@@ -1,3 +1,6 @@
+*~
+.*
+!.gitignore
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -22,6 +25,7 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
+tst/
 *.egg-info/
 .installed.cfg
 *.egg
