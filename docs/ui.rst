@@ -1,5 +1,5 @@
 ConDB2 Command Line Interface
-============================
+=============================
 
 List of Commands
 ----------------
