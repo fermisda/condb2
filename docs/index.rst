@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 ConDB2 Client Documentation
-==========================
+===========================
 
 .. toctree::
    :maxdepth: 1
@@ -14,6 +14,7 @@ ConDB2 Client Documentation
    ui
    web_api
    db_api
+   rest
 
 Indices and tables
 ==================

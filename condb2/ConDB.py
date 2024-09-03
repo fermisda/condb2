@@ -550,19 +550,17 @@ class CDFolder:
         return self.shadow_data(self.merge_timelines(initial, timelines))
 
 
-    def searchData(self, tag=None, tr=None, data_type=None, channel_range=None,
-            conditions=[]):
+    def searchData(self, tag=None, tr=None, data_type=None, channel_range=None, conditions=[]):
         """Find all data records on the timeline determined by (tag, tr, data_type)
             and satisfying specified conditions expressed in terms of data column values
 
         Parameters
         ----------
             conditions : list
-                Conditions cpecified as tuples:
-                    ("column_name", op, value)
-                column_name is a name of a data column
-                op is a string "<", "<=", "=", "!=", ">=", ">"
-                value is a string, boolean, numeric or None
+                Conditions specified as tuples: (`"column_name"`, `op`, `value`);
+                `column_name` is a name of a data column;
+                `op` is a string "<", "<=", "=", "!=", ">=", ">";
+                `value` is a string, boolean, numeric or None.
             tr : float, int
                 Retieve data retrospectively from a previous state of the database recorded at tr or earlier.
                 By default, will include most recent data.
@@ -578,6 +576,7 @@ class CDFolder:
         -------
         generator
             Generator of tuples: (channel, tv, tr, data_type, <data column values>...)
+
         """
 
         # sanitize data column names and values from the conditions

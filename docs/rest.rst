@@ -1,5 +1,5 @@
 ConDB2 REST API
-==============
+===============
 
 
 Getting data - <URL prefix>/get
@@ -10,11 +10,11 @@ HTTP method: GET
 Arguments
 ~~~~~~~~~
 
-* folder: text, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
-* t: int ot float - Validity timestamp to get data for.
-* t0, t1: int or float - Valitity time range to get data for. If t is specified, t0 and t1 are ignored.
-* data_type: text - data type to get data for. If unspecified, the data will be returned regardless of the data types.
-* format: text, optional - format of the output representation, ``csv`` or ``json``. Default: "csv"
+* **folder**: *text*, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
+* **t**: *int* or *float* - Validity timestamp to get data for.
+* **t0**, **t1**: *int* or *float* - Valitity time range to get data for. If t is specified, t0 and t1 are ignored.
+* **data_type**: *text* - data type to get data for. If unspecified, the data will be returned regardless of the data types.
+* **format**: *text*, optional - format of the output representation, ``csv`` or ``json``. Default: ``csv``
 
 Example:
 
@@ -31,11 +31,11 @@ Authentication required
 Arguments
 ~~~~~~~~~
 
-* folder: text, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
-* tr: float, int or text - the "record time" to associate the new data with. Default: current time.
-* data_type: text - data type to associate the data with. Default - blank, "".
+* **folder**: *text*, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
+* **tr**: *float*, *int* or *text* - the "record time" to associate the new data with. Default: current time.
+* **data_type**: *text* - data type to associate the data with. Default - blank, "".
 
-Request body must contain CSV-formatted data with first line containing list of columns in the CSV file. First 2 names must be "channel" and "tv".
+Request body must contain CSV-formatted data with first line containing list of columns in the CSV file. First 2 names must be the "channel" and "tv".
 The rest must be a list of one or more data columns.
 
 Example:
@@ -74,10 +74,10 @@ Authentication required
 Arguments
 ~~~~~~~~~
 
-* folder: text, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
-* tr: float, int or text, optional - the "record time" to associate the new data with. Default: current time.
-* copy_from: text, optional - existing tag to make a copy. If ``copy_from`` is used, ``tr`` is ignored.
-* override: text, "yes" or "no", optional - if "yes" and the tag with the same name exists, the tag will be moved to the new Tr. Default is "no"
+* **folder**: *text*, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
+* **tr**: *float*, *int* or *text*, optional - the "record time" to associate the new data with. Default: current time.
+* **copy_from**: *text*, optional - existing tag to make a copy. If ``copy_from`` is used, ``tr`` is ignored.
+* **override**: *text*, "yes" or "no", optional - if "yes" and the tag with the same name exists, the tag will be moved to the new Tr. Default is "no"
 
 The method requires ``digest authentication``, same as the ``put`` method.
 
@@ -89,8 +89,8 @@ HTTP method: GET
 Arguments
 ~~~~~~~~~
 
-* folder: text, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
-* format: text, optional - format of the output representation, ``csv`` or ``json``. Default: "csv"
+* **folder**: *text*, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
+* **format**: *text*, optional - format of the output representation, ``csv`` or ``json``. Default: "csv"
 
 Listing existing data types - <URL prefix>/data_types
 -----------------------------------------------------
@@ -100,5 +100,5 @@ HTTP method: GET
 Arguments
 ~~~~~~~~~
 
-* folder: text, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
-* format: text, optional - format of the output representation, ``csv`` or ``json``. Default: "csv"
+* **folder**: *text*, required - folder name. If the folder is in non-default namespace (schema), the folder name is in the format: <namespace>.<folder name>.
+* **format**: *text*, optional - format of the output representation, ``csv`` or ``json``. Default: ``csv``
