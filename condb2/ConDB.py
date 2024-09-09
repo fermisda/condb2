@@ -131,12 +131,14 @@ class ConDB:
         db_tables.sort()
         condb_tables = []
 
+        print(f"** ConDB.tables: {db_tables}")
         for t in db_tables:
-            if t.endswith("_snapshot"):
-                tn = t[:-len("_snapshot")]
+            if t.endswith("_update"):
+                tn = t[:-len("_update")]
                 if (tn+"_update") in db_tables_set and (tn+"_tag") in db_tables_set:
                         t = "%s.%s" % (namespace, tn)
-                        t = self.tableFromDB(t)
+                        # t = self.tableFromDB(t)
+                        t = self.openFolder(t)
                         if t:
                             condb_tables.append(t)
         return condb_tables
@@ -255,11 +257,11 @@ class CDFolder:
             return columns
 
 
-    def data_columns(self, prefix = None, as_text = False):
+    def data_columns(self, prefix=None, as_text=False):
         return self.__columns(self.DataColumns, prefix=prefix, as_text=as_text)
 
 
-    def all_columns(self, prefix = None, as_text = False):
+    def all_columns(self, prefix=None, as_text=False):
         return self.__columns(self.AllColumns, prefix=prefix, as_text=as_text)
 
 
