@@ -15,10 +15,3 @@ ConDB2 Client Documentation
    web_api
    db_api
    rest
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
