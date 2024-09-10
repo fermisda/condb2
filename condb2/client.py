@@ -13,7 +13,7 @@ from .http_client import HTTPClient
 
 class ConDBClient(HTTPClient):
 
-    Version = "2.0.2"
+    Version = "2.1.4"
 
     def __init__(self, url, username=None, password=None):
         """Initializes the ConDB client
