@@ -33,7 +33,7 @@ author = 'Igor Mandrichenko'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,8 +51,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 # html_theme = 'classic'
-# html_theme = 'sphinxdoc'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'sphinxdoc'
+### html_theme = 'sphinx_rtd_theme'
+# html_theme = 'alabaster'
+html_theme = 'agogo'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
