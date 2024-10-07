@@ -9,7 +9,7 @@
         {% for tv, clock, val in data %}
             {
                 "clock":    {{clock}},
-                "tv":       {{tv|as_json}},
+                "tv":       {{tv|as_number}},
                 "value":    [
                     {%- for v in val -%}
                         {{v|nones_to_nulls}}{{',' if not loop.last }}
@@ -19,4 +19,4 @@
         {% endfor %}
     ]
 }
-            
+

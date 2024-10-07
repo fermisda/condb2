@@ -403,8 +403,7 @@ class Handler(WPHandler):
         global_range = (cmin, cmax) if (cmin or cmax) else None
 
         if mode == "interpolate":
-            rows = folder.getData(t0, t1, data_type=data_type, tag=tag, tr=tr,
-                channel_range = global_range)
+            rows = folder.getData(t0, t1, data_type=data_type, tag=tag, tr=tr, channel_range=global_range)
         else:
             rows = folder.searchData(
                 conditions=conditions, data_type=data_type,

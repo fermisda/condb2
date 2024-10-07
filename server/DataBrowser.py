@@ -1,3 +1,4 @@
+# import pprint
 import time
 from webpie import WPHandler, Response
 # from dbdig import DbDig
@@ -88,6 +89,7 @@ class DataBrowser(WPHandler):
         do_plot = req.POST.get("do_plot", "no")
 
         tables = [t.Name.split('.')[-1] for t in db.tables(namespace)]
+        # print(f"*** plot_table: namespace={namespace}, tables={tables}, tag={tag}, data_type={data_type}, column={column}, time_as={time_as}, channels={channels}, t0={t0}, t1={t1}, do_plot={do_plot}")    # DEBUG
 
         time_as_int = time_as == "number"
         do_plot = do_plot == "yes"
@@ -111,8 +113,7 @@ class DataBrowser(WPHandler):
             # columns = t.columns() #VP
             columns = t.data_columns()
             tags = t.tags()
-            print(f"*** plot_table: columns: {columns}")
-            print(f"*** plot_table: tags: {tags}")
+            # print(f"*** plot_table: columns: {columns}")
             data_types = [dt for dt in t.dataTypes() if dt]
             if channels:
                 chan_range = channels.split(":", 1)
@@ -125,7 +126,8 @@ class DataBrowser(WPHandler):
         data_url = ""
 
         if do_plot and table_selected:
-            data_url = "./table_data?table=%s.%s&column=%s&t0=%s&t1=%s&channels=%s" % (namespace, table, column, t0, t1, channels)
+            # data_url = "./table_data?table=%s.%s&column=%s&t0=%s&t1=%s&channels=%s" % (namespace, table, column, t0, t1, channels)
+            data_url = "./table_data?table=%s&column=%s&t0=%s&t1=%s&channels=%s" % (table, column, t0, t1, channels)
             if tag_selected:
                 data_url += "&tag=%s" % (tag_selected,)
             if type_selected:
@@ -149,21 +151,24 @@ class DataBrowser(WPHandler):
             tags=tags,
             data_types=data_types,
             data_type=data_type,
-            t0 = t0 if t0 != None else '',
-            t1 = t1 if t1 != None else '',
+            t0 = t0 if t0 is not None else '',
+            t1 = t1 if t1 is not None else '',
             dt0 = text2datetime(t0) if t0 is not None else None,
             dt1 = text2datetime(t1) if t1 is not None else None,
         )
 
-    def table_data(self, req, relpath, table = None, column = None, t0 = None, t1 = None,
-                tag = None, channels = None, data_type = None, **args):
+    def table_data(self, req, relpath, table=None, column=None, t0=None, t1=None,
+                tag=None, channels=None, data_type=None, **args):
         db = self.App.db()
         # t = db.table(table, [column]) #VP
-        t = db.openFolder(table, [column])
-        t0 = t0 or 0
-        t1 = t1 or time.time()
-        t0 = text2datetime(t0)
-        t1 = text2datetime(t1)
+        t = db.openFolder(table)
+        if 0:
+            print(f"*** table_data: table='{table}'")
+            print(f"*** table_data: t={t}")
+        t0 = float(t0) if t0 else 0.0
+        t1 = float(t1) if t1 else time.time()
+        # t0 = text2datetime(t0)
+        # t1 = text2datetime(t1)
         if channels:
             channels = channels.split(":", 1)
             if len(channels) == 2:
@@ -174,16 +179,20 @@ class DataBrowser(WPHandler):
             channels = None
         data_type = data_type or None
 
-        #print("t0/t1:%s/%s, channels:%s, tag:%s, data_type:%s" % (t0, t1, channels, tag, data_type))
+        # print("*** table_data: t0/t1:%s/%s, channels:%s, tag:%s, data_type:%s" % (t0, t1, channels, tag, data_type))    # DEBUG
 
-        data = t.getDataInterval(t0, t1, tag=tag, data_type=data_type, channel_range=channels)
-        #print("t0/t1:%s/%s data:%d" % (t0,t1,len(data)))
+        data = t.getData(t0, t1, tag=tag, data_type=data_type, channel_range=channels, column=column)
+        data = [(r[0], r[1], r[2], r[3], r[4:]) for r in data]
+        data = sorted(data)
+        # print("*** table_data: t0/t1:%s/%s data len:%s" % (t0,t1,len(data)))    # DEBUG
 
         #data.sort(lambda x, y: cmp(x[1], y[1]) or cmp(x[0], y[0])) # by tv, then by channel
         data = sorted(data, key=lambda x: (x[1], x[0]))
         existing_channels = {}
-        for c, tv, vals in data:
-            existing_channels[c] = 1
+        # print("*** table_data:")    #VP
+        # pprint.pp(data)             #VP
+        for chnl, tv, _, _, vals in data:
+            existing_channels[chnl] = 1
         chan_list = sorted(existing_channels.keys())
         data_out = []
         if data:
@@ -194,17 +203,17 @@ class DataBrowser(WPHandler):
                 data_out.append((t0, epoch(t0), last_tup[:]))
             this_tup = last_tup[:]
             #print data
-            for c, tv, vals in data:
+            for chnl, tv, _, _, vals in data:
                 if last_t != tv:
                     # new or first point
-                    if last_t != None:
+                    if last_t is not None:
                         # new point
                         data_out.append((last_t, epoch(last_t), last_tup[:]))
                         data_out.append((last_t, epoch(last_t), this_tup[:]))
                         last_tup = this_tup
                         this_tup = last_tup[:]
                     last_t = tv
-                i = chan_list.index(c)
+                i = chan_list.index(chnl)
                 this_tup[i] = vals[0]
                 #print epoch(tv), "   last tup:", last_tup, "   this tup:", this_tup
             data_out.append((last_t, epoch(last_t), this_tup))
