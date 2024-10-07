@@ -20,21 +20,21 @@
 
     <table class=data>
         <tr>
-            <th>Name</th><th>Snapshots</th><th>Plot data</th>
+            <th>Name</th><th>Plot data</th>
         </tr>
         {% for t in tables %}
             <tr>
                 <td>{{t.Name}}</td>
-                <td><a href="./show_table?table={{t.TableName}}&namespace={{t.Namespace}}">{{t.snapshotCount()}}</a></td>
-                <td><a href="./plot_table?table={{t.TableName}}&namespace={{t.Namespace}}">plot</a></td>
+                {# <td><a href="./show_table?table={{t.TableName}}&namespace={{t.Namespace}}">{{t.snapshotCount()}}</a></td> #}
+                <td><a href="./plot_table?table={{t.Name}}&namespace={{t.Namespace}}">plot</a></td>
             </tr>
         {% endfor %}
     </table>
-    
+
 {% else %}
 
     No Con DB tables found in namespace {{namespace}}
 
 {% endif %}
 
-{% endblock %}    
+{% endblock %}

@@ -18,6 +18,7 @@ from wsdbtools import ConnectionPool
 from condb2 import ConDB, signature
 from condb2 import __version__ as condb_version
 from condb2.timelib import epoch, text2timestamp
+from DataBrowser import DataBrowser
 
 REST_Version = "2.0.1"
 API_Version = condb_version
@@ -108,7 +109,7 @@ class ServerApp(WPApp):
     def db(self):
         conn = self.ConnPool.connect()
         #print("App.db(): connection:", id(conn), conn)
-        return ConDB(connection = conn)
+        return ConDB(connection=conn)
 
 def cache_control(*control, max_age=None):
     parts = []
@@ -124,7 +125,7 @@ def cache_control(*control, max_age=None):
 class Handler(WPHandler):
     def __init__(self, req, app):
         WPHandler.__init__(self, req, app)
-        #self.B = DataBrowser(req, app)
+        self.B = DataBrowser(req, app)
 
     def probe(self, req, relpath, **args):
         try:
@@ -139,9 +140,7 @@ class Handler(WPHandler):
             return 500, "Probe error: %s" % (traceback.format_exc(),), cache_control("no-store")
 
     def version(self, req, relpath, **args):
-        return '{ "REST":"%s", "API":"%s" }\n' % \
-                    (REST_Version, API_Version) \
-                , "text/json", cache_control(max_age=3600)
+        return '{ "REST":"%s", "API":"%s" }\n' % (REST_Version, API_Version), "text/json", cache_control(max_age=3600)
 
     def dataTupleToCSV(self, tup):
         text_values = []
@@ -404,8 +403,7 @@ class Handler(WPHandler):
         global_range = (cmin, cmax) if (cmin or cmax) else None
 
         if mode == "interpolate":
-            rows = folder.getData(t0, t1, data_type=data_type, tag=tag, tr=tr,
-                channel_range = global_range)
+            rows = folder.getData(t0, t1, data_type=data_type, tag=tag, tr=tr, channel_range=global_range)
         else:
             rows = folder.searchData(
                 conditions=conditions, data_type=data_type,

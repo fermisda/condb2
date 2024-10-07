@@ -1,6 +1,12 @@
 {% extends 'template.html' %}
 
 {% block head %}
+<!-- UIkit CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/css/uikit.min.css" />
+
+<!-- UIkit JS -->
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit-icons.min.js"></script>
 <!-- <script type="text/javascript" src="https://www.google.com/jsapi"></script> -->
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -46,8 +52,8 @@ function data_received_callback()
         this.data_receiver= null;
         var parsed = null;
         var error = false;
-        try         {   
-                        parsed = JSON.parse(this.responseText); 
+        try         {
+                        parsed = JSON.parse(this.responseText);
                     }
         catch(err)  {
                         error = true;
@@ -75,7 +81,7 @@ function XMLRequest(url, receiver, cacheable)
     http_request.open("GET", url, true);
     http_request.send();
     return http_request;
-}            
+}
 
 
 function chart(element, options, url)
@@ -122,14 +128,16 @@ function chart(element, options, url)
 
 {% block body %}
 
-<h2>Plot table {{namespace}}.{{table}}</h2>
+<!-- <h2>Plot table {{namespace}}.{{table}}</h2> -->
+<h2>Plot table {{table}}</h2>
 
 
-<p><a href="./index?namespace={{namespace}}">&lt; other tables</a>&nbsp;&nbsp;&nbsp;<a href="./show_table?namespace={{namespace}}&table={{table}}">show snapshots</a></p>
+<p><a href="./index?namespace={{namespace}}">&lt; other tables</a>
+    <!--&nbsp;&nbsp;&nbsp;<a href="./show_table?namespace={{namespace}}&table={{table}}">show snapshots</a></p> -->
 
 
 {% if table %}
-                            
+
     <p>
         <form action="" method="POST">
             <input type="hidden" name="do_plot" value="yes"/>
@@ -137,13 +145,13 @@ function chart(element, options, url)
             <input type="hidden" name="table" value="{{table}}"/>
             <table class="form">
                 <tr>
-                    <th>Channels (from:to)</th>
-                    <td><input type="text" name="channels" value="{{channels or ''}}"/></td>
+                    <th class="uk-form-controls">Channels (from:to)</th>
+                    <td><input class="uk-input uk-form-small" type="text" name="channels" value="{{channels or ''}}"/></td>
                 </tr>
-                
+
                 <tr>
                     <th>Data type</th>
-                    <td><select name="data_type">
+                    <td><select class="uk-select uk-form-small" name="data_type">
                         <option value="">(common)</option>
                         {% for t in data_types %}
                             <option value="{{t}}" {{"selected=selected" if t == data_type}}>{{t}}</option>
@@ -152,25 +160,29 @@ function chart(element, options, url)
                 </tr>
                 <tr>
                     <th>Tag</th>
-                    <td><select name="tag">
+                    <td><select class="uk-select uk-form-small" name="tag">
                         <option value="">(none)</option>
                         {% for t in tags %}
-                            <option value="{{t}}" {{"selected=selected" if t == tag_selected}}>{{t}}</option>
+                            <option value="{{t.0}}" {{"selected=selected" if t.0 == tag_selected}}>{{t.0}}</option>
                         {% endfor %}
                     </td>
                 </tr>
                 <tr>
                     <th>Time</th>
-                    <td>from:&nbsp;<input type="text" name="t0" value="{{t0}}"/>&nbsp;&nbsp;to:&nbsp;<input type="text" name="t1" value="{{t1}}"/></td>
+                    <td>
+                        from:&nbsp;<input class="uk-input uk-form-small uk-width-2-5@s" type="text" name="t0" value="{{t0}}"/>&nbsp;&nbsp;
+                        to:&nbsp;<input class="uk-input uk-form-small uk-width-2-5@s" type="text" name="t1" value="{{t1}}"/>
+                    </td>
                 </tr>
                 <tr>
                     <th>Column</th>
-                    <td><select name="column">
+                    <td><select class="uk-select uk-form-small" name="column">
                         {% for c in columns %}
                             <option value="{{c}}" {{"selected=selected" if c == column}}>{{c}}</option>
                         {% endfor %}
                     </td>
                 </tr>
+                <!--
                 <tr>
                     <th>Time as</th>
                     <td><select name="time_as">
@@ -179,9 +191,10 @@ function chart(element, options, url)
                         </select>
                     </td>
                 </tr>
+            -->
                 <tr>
                     <td></td>
-                    <td><input type="submit" value="Plot"/>
+                    <td><input class="uk-button uk-button-small uk-button-default" type="submit" value="Plot"/>
                     </td>
                 </tr>
             </table>
@@ -198,22 +211,22 @@ function chart(element, options, url)
 
     //-------------------------
     // Request frequencies
-    
+
     <!-- dt0: {{dt0}}, dt1: {{dt1}} -->
 
     function drawChart()
     {
-        var f_chart = new chart("the_chart", 
+        var f_chart = new chart("the_chart",
                 {
                     title: "",
                     legend: {   position: "right"   },
-                    //width:800, 
-                    lineWidth:1, 
+                    //width:800,
+                    lineWidth:1,
                     hAxis: {
                         {% if time_as_int %}
                             format: "",
                             minValue:   {{dt0|as_number}},
-                            maxValue:   {{dt1|as_number}},
+                            maxValue:   {{dt1|as_number or 0}},
                         {% else %}
                             gridlines: {
                                         count: -1,
@@ -228,7 +241,7 @@ function chart(element, options, url)
                                       minutes: {format: ['HH:mm a Z', ':mm']}
                                     }
                                 },
-                            minValue:   {{dt0|as_json}}, 
+                            minValue:   {{dt0|as_json}},
                             maxValue:   {{dt1|as_json}},
                         {% endif %}
                         title:  "time"
@@ -236,22 +249,22 @@ function chart(element, options, url)
                     pointSize: 2,
                     vAxis:{title:"{{column}}"},
                     explorer:   {   axis:   "horizontal",   actions:    ["dragToZoom", "rightClickToReset"],
-                                    maxZoomIn: 0.1 
+                                    maxZoomIn: 0.1
                                 }
                 },
                 "{{data_url}}"
                 );
-            
+
         f_chart.makeDataTable = function(data)
         {
             var dt = new google.visualization.DataTable();
-        
+
             {% if time_as_int %}
                 dt.addColumn("number", "Time");
             {% else %}
                 dt.addColumn("datetime", "Time");
             {% endif %}
-        
+
             var i;
             for( i=0; i < data.channels.length; i++ )
             {
@@ -259,8 +272,8 @@ function chart(element, options, url)
                 dt.addColumn("number", "ch "+c);
                 dt.addColumn({  type:   "string", role:   "style" });
             }
-        
-            var d = data.data;    
+
+            var d = data.data;
             for( i=0; i < d.length; i++ )
             {
                 var tup = d[i];
@@ -280,10 +293,10 @@ function chart(element, options, url)
             }
             return dt;
         }
-    
+
         f_chart.request_data();
     }
-    
+
     google.charts.setOnLoadCallback(drawChart);
 
 </script>

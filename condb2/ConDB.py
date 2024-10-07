@@ -131,12 +131,14 @@ class ConDB:
         db_tables.sort()
         condb_tables = []
 
+        # print(f"** ConDB.tables: {db_tables}")
         for t in db_tables:
-            if t.endswith("_snapshot"):
-                tn = t[:-len("_snapshot")]
+            if t.endswith("_update"):
+                tn = t[:-len("_update")]
                 if (tn+"_update") in db_tables_set and (tn+"_tag") in db_tables_set:
                         t = "%s.%s" % (namespace, tn)
-                        t = self.tableFromDB(t)
+                        # t = self.tableFromDB(t)
+                        t = self.openFolder(t)
                         if t:
                             condb_tables.append(t)
         return condb_tables
@@ -255,11 +257,11 @@ class CDFolder:
             return columns
 
 
-    def data_columns(self, prefix = None, as_text = False):
+    def data_columns(self, prefix=None, as_text=False):
         return self.__columns(self.DataColumns, prefix=prefix, as_text=as_text)
 
 
-    def all_columns(self, prefix = None, as_text = False):
+    def all_columns(self, prefix=None, as_text=False):
         return self.__columns(self.AllColumns, prefix=prefix, as_text=as_text)
 
 
@@ -478,7 +480,7 @@ class CDFolder:
         return sorted(list(initial) + list(timelines), key = lambda row: tuple(row[:3]))       # sort by channel, tv, data_type
 
 
-    def getData(self, t0, t1=None, tag=None, tr=None, data_type=None, channel_range=None):
+    def getData(self, t0, t1=None, tag=None, tr=None, data_type=None, channel_range=None, column=None):
         """Retieves data for specified validity time or time interval from the folder
 
         Parameters
@@ -512,6 +514,13 @@ class CDFolder:
             return initial
 
         all_columns = self.all_columns(prefix="u", as_text=True)
+        if column and column in all_columns:
+            ac = all_columns.split(",")
+            # print(f"*** getData: ac={ac}")
+            ac = [c for c in ac if c.startswith("u.__") or c[2:] == column]
+            # print(f"*** getData: ac={ac}")
+            all_columns = ",".join(ac)
+            # print(f"*** getData: all_columns={all_columns}")
 
         params = {
             "tv0"        : t0,
@@ -522,8 +531,21 @@ class CDFolder:
             "min_channel": channel_range[0] if channel_range else None,
             "max_channel": channel_range[1] if channel_range else None
         }
+        # print(f"all_columns={all_columns}")
+        # print(f"params={params}")
 
         if tag is not None:
+            # print(f"""
+            #     select distinct on (u.__channel, u.__tv) {all_columns} from %t_update u, %t_tag t
+            #         where u.__tv > %(tv0)s
+            #             and (%(tv1)s is null or u.__tv <= %(tv1)s)
+            #             and u.__tr < t.__tr
+            #             and t.__name = %(tag)s
+            #             and (%(data_type)s is null or u.__data_type = %(data_type)s)
+            #             and (%(min_channel)s is null or u.__channel >= %(min_channel)s)
+            #             and (%(max_channel)s is null or u.__channel <= %(max_channel)s)
+            #         order by u.__channel, u.__tv, u.__tr desc
+            # """, params)
             c = self.execute(f"""
                 select distinct on (u.__channel, u.__tv) {all_columns} from %t_update u, %t_tag t
                     where u.__tv > %(tv0)s
@@ -536,6 +558,16 @@ class CDFolder:
                     order by u.__channel, u.__tv, u.__tr desc
             """, params)
         else:
+            # print(f"""***
+            #     select distinct on (u.__channel, u.__tv) {all_columns} from %t_update u
+            #         where u.__tv > %(tv0)s
+            #             and (%(tv1)s is null or u.__tv <= %(tv1)s)
+            #             and (%(tr)s is null or u.__tr < %(tr)s)
+            #             and (%(data_type)s is null or u.__data_type = %(data_type)s)
+            #             and (%(min_channel)s is null or u.__channel >= %(min_channel)s)
+            #             and (%(max_channel)s is null or u.__channel <= %(max_channel)s)
+            #         order by u.__channel, u.__tv, u.__tr desc
+            # """, params)
             c = self.execute(f"""
                 select distinct on (u.__channel, u.__tv) {all_columns} from %t_update u
                     where u.__tv > %(tv0)s
