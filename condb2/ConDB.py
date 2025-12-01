@@ -435,12 +435,12 @@ class CDFolder:
                 yield tup
 
 
-    def _get_data_point(self, tv, tag=None, tr=None, data_type=None, channel_range=None):
+    def _get_data_point(self, tv, tag=None, tr=None, data_type=None, channel_range=None, columns=None):
         # returns iterator [(channel, tv, data_type, data, ...)] unsorted
         # if data_type is None, returns all data types. otherwise - specified
         # data_type can be ""
 
-        all_columns = self.all_columns(prefix="u", as_text=True)
+        all_columns = columns or self.all_columns(prefix="u", as_text=True)
 
         params = {
             "tv":   tv,
@@ -508,11 +508,6 @@ class CDFolder:
             Generator of tuples: (channel, tv, tr, data_type, <data column values>...)
         """
 
-        # initial data
-        initial = self._get_data_point(t0, tag=tag, tr=tr, data_type=data_type, channel_range=channel_range)
-        if t0 == t1 or t1 is None:
-            return initial
-
         all_columns = self.all_columns(prefix="u", as_text=True)
         if column and column in all_columns:
             ac = all_columns.split(",")
@@ -533,6 +528,12 @@ class CDFolder:
         }
         # print(f"all_columns={all_columns}")
         # print(f"params={params}")
+
+        # initial data
+        initial = self._get_data_point(t0, tag=tag, tr=tr, data_type=data_type, channel_range=channel_range, columns=all_columns)
+        if t0 == t1 or t1 is None:
+            return initial
+
 
         if tag is not None:
             # print(f"""

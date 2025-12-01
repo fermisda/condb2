@@ -5,13 +5,14 @@
 <h2>Tables in namespace: {{namespace}}</h2>
 
 <form action="" method="GET">
-    Go to namespace: <select name=namespace>
+    Go to namespace: <select class="uk-select uk-form-small uk-form-width-medium" name="namespace">
         {% for ns in namespaces %}
             <option value="{{ns}}"
                 {{ 'selected=selected' if ns == namespace }}
                 >{{ns}}</option>
         {% endfor %}
-    </select> <input type="submit" value="Go"/>
+    </select>
+    <input class="uk-button uk-button-small uk-button-default" type="submit" value="Go"/>
 </form>
 
 
