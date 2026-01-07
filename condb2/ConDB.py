@@ -473,12 +473,52 @@ class CDFolder:
 
         yield from cursor_iterator(c)
 
+    def _get_data_run(self, run, tag=None, tr=None, data_type=None, channel_range=None):
+        # returns iterator [(channel, tv, data_type, data, ...)] unsorted
+        # if data_type is None, returns all data types. otherwise - specified
+        # data_type can be ""
+
+        all_columns = self.all_columns(prefix="u", as_text=True)
+
+        params = {
+            "tv":   run,
+            "tag":  tag,
+            "tr":   tr,
+            "data_type": data_type,
+            "min_channel": channel_range[0] if channel_range else None,
+            "max_channel": channel_range[1] if channel_range else None
+        }
+
+        if tag is not None:
+            c = self.execute(f"""
+                select distinct on (u.__channel) {all_columns} from %t_update u, %t_tag t
+                    where u.__tv = %(tv)s
+                        and u.__tr < t.__tr
+                        and t.__name = %(tag)s
+                        and (%(data_type)s is null or u.__data_type = %(data_type)s)
+                        and (%(min_channel)s is null or u.__channel >= %(min_channel)s)
+                        and (%(max_channel)s is null or u.__channel <= %(max_channel)s)
+                    order by u.__channel, u.__tr desc, u.__tv desc
+            """, params)
+        else:
+            c = self.execute(f"""
+                select distinct on (u.__channel) {all_columns} from %t_update u
+                    where u.__tv = %(tv)s
+                        and (%(tr)s is null or u.__tr < %(tr)s)
+                        and (%(data_type)s is null or u.__data_type = %(data_type)s)
+                        and (%(min_channel)s is null or u.__channel >= %(min_channel)s)
+                        and (%(max_channel)s is null or u.__channel <= %(max_channel)s)
+                    order by u.__channel, u.__tr desc, u.__tv desc
+            """, params)
+
+        yield from cursor_iterator(c)
+       
 
     def merge_timelines(self, initial, timelines):
         return sorted(list(initial) + list(timelines), key = lambda row: tuple(row[:3]))       # sort by channel, tv, data_type
 
 
-    def getData(self, t0, t1=None, tag=None, tr=None, data_type=None, channel_range=None):
+    def getData(self, t0=None, t1=None, tag=None, tr=None, data_type=None, channel_range=None, *, run=None, run0=None, run1=None):
         """Retieves data for specified validity time or time interval from the folder
 
         Parameters
@@ -499,6 +539,12 @@ class CDFolder:
             channel_range : tuple
                 Tuple (min_channel, max_channel) if provided, only the channels within the specified interval, inclusively
                 will be included in the output. Each one of the limits can be None, which means there is no limit.
+            run : int, None
+                The exact run to look 
+            run0 : int, None
+                First run of an interval of runs
+            run1 : int, None
+                Last run of an interval of runs
 
         Returns
         -------
@@ -507,21 +553,39 @@ class CDFolder:
         """
 
         # initial data
-        initial = self._get_data_point(t0, tag=tag, tr=tr, data_type=data_type, channel_range=channel_range)
-        if t0 == t1 or t1 is None:
-            return initial
+        if t0 is not None:
+            initial = self._get_data_point(t0, tag=tag, tr=tr, data_type=data_type, channel_range=channel_range)
+            if t0 == t1 or t1 is None:
+                return initial
+        if run0 is not None:
+            run = run0
+        if run is not None:
+            initial = self._get_data_run(tag=tag, tr=tr, data_type=data_type, channel_range=channel_range, run=run)
+            if run0 == run1 or run1 is None:
+                return initial
 
         all_columns = self.all_columns(prefix="u", as_text=True)
-
-        params = {
-            "tv0"        : t0,
-            "tv1"        : t1,
-            "tag"        : tag,
-            "tr"         : tr,
-            "data_type"  : data_type,
-            "min_channel": channel_range[0] if channel_range else None,
-            "max_channel": channel_range[1] if channel_range else None
-        }
+        
+        if t0 is not None and t1 is not None:
+            params = {
+                "tv0"        : t0,
+                "tv1"        : t1,
+                "tag"        : tag,
+                "tr"         : tr,
+                "data_type"  : data_type,
+                "min_channel": channel_range[0] if channel_range else None,
+                "max_channel": channel_range[1] if channel_range else None
+            }
+        elif run0 is not None and run1 is not None:
+            params = {
+                "tv0"        : run0,
+                "tv1"        : run1,
+                "tag"        : tag,
+                "tr"         : tr,
+                "data_type"  : data_type,
+                "min_channel": channel_range[0] if channel_range else None,
+                "max_channel": channel_range[1] if channel_range else None
+            }
 
         if tag is not None:
             c = self.execute(f"""
